@@ -1,15 +1,18 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: ECR Repository
+
 Resources:
   ECRRepository:
     Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
     Properties:
-      RepositoryName: cicd-ecr-app
+      RepositoryName: !Sub '${AWS::StackName}-app-repo'
       ImageScanningConfiguration:
         ScanOnPush: true
       Tags:
         - Key: Name
-          Value: cicd-ecr-repo
+          Value: !Sub '${AWS::StackName}-ecr-repo'
+
 Outputs:
   ECRRepositoryUri:
     Value: !GetAtt ECRRepository.RepositoryUri
