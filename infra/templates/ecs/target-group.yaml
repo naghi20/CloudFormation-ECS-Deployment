@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ALB Target Group
+Parameters:
+  VpcStackName:
+    Type: String
+Resources:
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: cicd-ecr-tg
+      Port: 80
+      Protocol: HTTP
+      VpcId: !ImportValue
+        Fn::Sub: '${VpcStackName}-VpcId'
+      TargetType: ip
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      Tags:
+        - Key: Name
+          Value: cicd-ecr-tg
+Outputs:
+  TargetGroupArn:
+    Value: !GetAtt TargetGroup.TargetGroupArn
+    Export:
+      Name: !Sub '${AWS::StackName}-TargetGroupArn'
