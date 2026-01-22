@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECR Repository
+Resources:
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: cicd-ecr-app
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      Tags:
+        - Key: Name
+          Value: cicd-ecr-repo
+Outputs:
+  ECRRepositoryUri:
+    Value: !GetAtt ECRRepository.RepositoryUri
+    Export:
+      Name: !Sub '${AWS::StackName}-ECRRepoUri'
+  ECRRepositoryName:
+    Value: !Ref ECRRepository
+    Export:
+      Name: !Sub '${AWS::StackName}-ECRRepoName'
