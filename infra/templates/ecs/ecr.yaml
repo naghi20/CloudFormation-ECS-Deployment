@@ -6,7 +6,7 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       RepositoryName: !Sub '${AWS::StackName}-repo'
-            ImageScanningConfiguration:
+      ImageScanningConfiguration:
         ScanOnPush: true
       Tags:
         - Key: Name
