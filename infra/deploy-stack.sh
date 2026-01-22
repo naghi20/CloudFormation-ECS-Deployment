@@ -47,7 +47,7 @@ if [ -z "$1" ]; then
   sleep 2
   
   print_status "Uploading CloudFormation templates to S3..."
-  if ! aws s3 cp templates/ s3://$TEMPLATES_BUCKET/templates/ --recursive --region $AWS_REGION; then
+  if ! aws s3 cp ./templates/ s3://$TEMPLATES_BUCKET/templates/ --recursive --region $AWS_REGION; then
     print_error "Failed to upload templates to S3"
     exit 1
   fi
@@ -72,7 +72,7 @@ print_status "ECR Repository URI: $ECR_URI"
 # Build and push Docker image
 print_status "Building Docker image..."
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
-docker build -t $ECR_REPO_NAME:latest app/
+docker build -t $ECR_REPO_NAME:latest ../app/
 docker tag $ECR_REPO_NAME:latest $ECR_URI:latest
 
 print_status "Pushing image to ECR..."
@@ -81,11 +81,11 @@ docker push $ECR_URI:latest
 # Deploy CloudFormation stack
 print_status "Deploying CloudFormation stack..."
 aws cloudformation deploy \
-  --template-file infra/main.yaml \
+  --template-file main.yaml \
   --stack-name $STACK_NAME \
   --parameter-overrides \
-    ECRImageUri=$ECR_URI:latest \
-    TemplatesBucket=$TEMPLATES_BUCKET \
+  ECRImageUri=$ECR_URI:latest \
+  TemplatesBucket=$TEMPLATES_BUCKET \
   --region $AWS_REGION \
   --capabilities CAPABILITY_NAMED_IAM
 
