@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Internet Gateway
+Parameters:
+  VpcStackName:
+    Type: String
+Resources:
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: cicd-ecr-igw
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !ImportValue
+        Fn::Sub: '${VpcStackName}-VpcId'
+      InternetGatewayId: !Ref InternetGateway
+Outputs:
+  InternetGatewayId:
+    Value: !Ref InternetGateway
+    Export:
+      Name: !Sub '${AWS::StackName}-IGWId'
