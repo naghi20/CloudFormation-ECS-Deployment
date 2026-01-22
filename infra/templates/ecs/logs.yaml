@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudWatch Logs Group
+Resources:
+  ECSLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/cicd-ecr-app
+      RetentionInDays: 7
+Outputs:
+  LogGroupName:
+    Value: !Ref ECSLogsGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-LogGroupName'
