@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECS Service
+Parameters:
+  ClusterStackName:
+    Type: String
+    Description: CloudFormation stack name for cluster
+  TaskDefStackName:
+    Type: String
+    Description: CloudFormation stack name for task definition
+  TargetGroupStackName:
+    Type: String
+    Description: CloudFormation stack name for target group
+  SubnetsStackName:
+    Type: String
+    Description: CloudFormation stack name for subnets
+  ECSSecurityGroupStackName:
+    Type: String
+    Description: CloudFormation stack name for ECS security group
+Resources:
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: ALBListenerRule
+    Properties:
+      ServiceName: cicd-ecr-service
+      Cluster: !ImportValue
+        Fn::Sub: '${ClusterStackName}-ClusterName'
+      TaskDefinition: !ImportValue
+        Fn::Sub: '${TaskDefStackName}-TaskDefArn'
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !ImportValue
+              Fn::Sub: '${SubnetsStackName}-PublicSubnet1'
+            - !ImportValue
+              Fn::Sub: '${SubnetsStackName}-PublicSubnet2'
+          SecurityGroups:
+            - !ImportValue
+              Fn::Sub: '${ECSSecurityGroupStackName}-ECSTaskSGId'
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: 80
+          TargetGroupArn: !ImportValue
+            Fn::Sub: '${TargetGroupStackName}-TargetGroupArn'
+      Tags:
+        - Key: Name
+          Value: cicd-ecr-service
+  ALBListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !ImportValue
+            Fn::Sub: '${TargetGroupStackName}-TargetGroupArn'
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /*
+      ListenerArn: !Sub 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/cicd-ecr-alb/*'
+      Priority: 1
+Outputs:
+  ServiceName:
+    Value: !GetAtt ECSService.ServiceName
+    Export:
+      Name: !Sub '${AWS::StackName}-ServiceName'
+  ServiceArn:
+    Value: !GetAtt ECSService.ServiceArn
+    Export:
+      Name: !Sub '${AWS::StackName}-ServiceArn'
