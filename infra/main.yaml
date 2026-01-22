@@ -20,7 +20,7 @@ Resources:
       StackName: cicd-ecr-igw-stack
       TemplateURL: ./templates/vpc/igw.yaml
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
+        VpcStackName: cicd-ecr-vpc-stack
   
   # Subnets Stack
   SubnetsStack:
@@ -30,7 +30,7 @@ Resources:
       StackName: cicd-ecr-subnets-stack
       TemplateURL: ./templates/vpc/subnets.yaml
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
+        VpcStackName: cicd-ecr-vpc-stack
   
   # Route Table Stack
   RouteTableStack:
@@ -42,8 +42,8 @@ Resources:
       StackName: cicd-ecr-routetable-stack
       TemplateURL: ./templates/vpc/route-table.yaml
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
-        SubnetsStackName: !GetAtt SubnetsStack.StackName
+        VpcStackName: cicd-ecr-vpc-stack
+        SubnetsStackName: cicd-ecr-subnets-stack
   
   # Route Stack
   RouteStack:
@@ -55,8 +55,8 @@ Resources:
       StackName: cicd-ecr-route-stack
       TemplateURL: ./templates/vpc/route.yaml
       Parameters:
-        RouteTableStackName: !GetAtt RouteTableStack.StackName
-        IGWStackName: !GetAtt IGWStack.StackName
+        RouteTableStackName: cicd-ecr-routetable-stack
+        IGWStackName: cicd-ecr-igw-stack
   
   # ALB Security Group Stack
   ALBSGStack:
@@ -66,7 +66,7 @@ Resources:
       StackName: cicd-ecr-alb-sg-stack
       TemplateURL: ./templates/security/alb-sg.yaml
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
+        VpcStackName: cicd-ecr-vpc-stack
   
   # ECS Security Group Stack
   ECSSGStack:
@@ -78,8 +78,8 @@ Resources:
       StackName: cicd-ecr-ecs-sg-stack
       TemplateURL: ./templates/security/ecs-sg.yaml
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
-        ALBSGStackName: !GetAtt ALBSGStack.StackName
+        VpcStackName: cicd-ecr-vpc-stack
+        ALBSGStackName: cicd-ecr-alb-sg-stack
   
   # ECR Stack
   ECRStack:
@@ -119,8 +119,8 @@ Resources:
       StackName: cicd-ecr-alb-stack
       TemplateURL: ./templates/ecs/alb.yaml
       Parameters:
-        SubnetsStackName: !GetAtt SubnetsStack.StackName
-        ALBSGStackName: !GetAtt ALBSGStack.StackName
+        SubnetsStackName: cicd-ecr-subnets-stack
+        ALBSGStackName: cicd-ecr-alb-sg-stack
   
   # Target Group Stack
   TargetGroupStack:
@@ -130,7 +130,7 @@ Resources:
       StackName: cicd-ecr-targetgroup-stack
       TemplateURL: ./templates/ecs/target-group.yaml
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
+        VpcStackName: cicd-ecr-vpc-stack
   
   # Task Definition Stack
   TaskDefStack:
@@ -144,8 +144,8 @@ Resources:
       TemplateURL: ./templates/ecs/taskdef.yaml
       Parameters:
         ECRRepoUri: !Ref ECRImageUri
-        LogGroupStackName: !GetAtt LogsStack.StackName
-        IAMStackName: !GetAtt IAMStack.StackName
+        LogGroupStackName: cicd-ecr-logs-stack
+        IAMStackName: cicd-ecr-iam-stack
   
   # ECS Service Stack
   ServiceStack:
@@ -160,12 +160,11 @@ Resources:
       StackName: cicd-ecr-service-stack
       TemplateURL: ./templates/ecs/service.yaml
       Parameters:
-        ClusterStackName: !GetAtt ClusterStack.StackName
-        TaskDefStackName: !GetAtt TaskDefStack.StackName
-        TargetGroupStackName: !GetAtt TargetGroupStack.StackName
-        SubnetsStackName: !GetAtt SubnetsStack.StackName
-        ECSSecurityGroupStackName: !GetAtt ECSSGStack.StackName
-
+        ClusterStackName: cicd-ecr-cluster-stack
+        TaskDefStackName: cicd-ecr-taskdef-stack
+        TargetGroupStackName: cicd-ecr-targetgroup-stack
+        SubnetsStackName: cicd-ecr-subnets-stack
+        ECSSecurityGroupStackName: cicd-ecr-ecs-sg-stack
 Outputs:
   ALBDNSName:
     Description: ALB DNS Name
