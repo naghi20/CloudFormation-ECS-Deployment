@@ -1,6 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Main CloudFormation Stack Orchestrator
-
 Parameters:
   ECRImageUri:
     Type: String
@@ -8,14 +7,12 @@ Parameters:
   TemplatesBucket:
     Type: String
     Description: S3 Bucket name where CloudFormation templates are stored
-
 Resources:
   # VPC Stack
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/vpc.yaml'
-
   # Internet Gateway Stack
   IGWStack:
     Type: AWS::CloudFormation::Stack
@@ -24,7 +21,6 @@ Resources:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/igw.yaml'
       Parameters:
         VpcStackName: !Ref VPCStack
-
   # Subnets Stack
   SubnetsStack:
     Type: AWS::CloudFormation::Stack
@@ -33,7 +29,6 @@ Resources:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/subnets.yaml'
       Parameters:
         VpcStackName: !Ref VPCStack
-
   # Route Table Stack
   RouteTableStack:
     Type: AWS::CloudFormation::Stack
@@ -45,7 +40,6 @@ Resources:
       Parameters:
         VpcStackName: !Ref VPCStack
         SubnetsStackName: !Ref SubnetsStack
-
   # Route Stack
   RouteStack:
     Type: AWS::CloudFormation::Stack
@@ -57,7 +51,6 @@ Resources:
       Parameters:
         RouteTableStackName: !Ref RouteTableStack
         IGWStackName: !Ref IGWStack
-
   # ALB Security Group Stack
   ALBSGStack:
     Type: AWS::CloudFormation::Stack
@@ -66,7 +59,6 @@ Resources:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/security/alb-sg.yaml'
       Parameters:
         VpcStackName: !Ref VPCStack
-
   # ECS Security Group Stack
   ECSSGStack:
     Type: AWS::CloudFormation::Stack
@@ -78,31 +70,26 @@ Resources:
       Parameters:
         VpcStackName: !Ref VPCStack
         ALBSGStackName: !Ref ALBSGStack
-
   # ECR Stack
   ECRStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/ecr.yaml'
-
   # Logs Stack
   LogsStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/logs.yaml'
-
   # IAM Stack
   IAMStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/iam.yaml'
-
   # Cluster Stack
   ClusterStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/cluster.yaml'
-
   # ALB Stack
   ALBStack:
     Type: AWS::CloudFormation::Stack
@@ -114,7 +101,6 @@ Resources:
       Parameters:
         SubnetsStackName: !Ref SubnetsStack
         ALBSGStackName: !Ref ALBSGStack
-
   # Target Group Stack
   TargetGroupStack:
     Type: AWS::CloudFormation::Stack
@@ -123,7 +109,6 @@ Resources:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/target-group.yaml'
       Parameters:
         VpcStackName: !Ref VPCStack
-
   # Task Definition Stack
   TaskDefStack:
     Type: AWS::CloudFormation::Stack
@@ -137,7 +122,6 @@ Resources:
         ECRRepoUri: !Ref ECRImageUri
         LogGroupStackName: !Ref LogsStack
         IAMStackName: !Ref IAMStack
-
   # ECS Service Stack
   ServiceStack:
     Type: AWS::CloudFormation::Stack
@@ -147,6 +131,7 @@ Resources:
       - TargetGroupStack
       - SubnetsStack
       - ECSSGStack
+      - ALBStack
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/service.yaml'
       Parameters:
@@ -155,7 +140,7 @@ Resources:
         TargetGroupStackName: !Ref TargetGroupStack
         SubnetsStackName: !Ref SubnetsStack
         ECSSecurityGroupStackName: !Ref ECSSGStack
-
+        ALBStackName: !Ref ALBStack
 Outputs:
   ALBDNSName:
     Description: ALB DNS Name
