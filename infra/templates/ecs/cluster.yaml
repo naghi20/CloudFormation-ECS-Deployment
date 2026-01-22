@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: ECS Cluster
+
 Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -11,12 +12,13 @@ Resources:
       Tags:
         - Key: Name
           Value: cicd-ecr-cluster
+
 Outputs:
   ClusterName:
     Value: !Ref ECSCluster
     Export:
       Name: !Sub '${AWS::StackName}-ClusterName'
   ClusterArn:
-    Value: !GetAtt ECSCluster.ClusterArn
+    Value: !GetAtt ECSCluster.Arn
     Export:
       Name: !Sub '${AWS::StackName}-ClusterArn'
