@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Main CloudFormation Stack Orchestrator
+
 Parameters:
   ECRImageUri:
     Type: String
@@ -7,34 +8,32 @@ Parameters:
   TemplatesBucket:
     Type: String
     Description: S3 Bucket name where CloudFormation templates are stored
+
 Resources:
   # VPC Stack
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      StackName: cicd-ecr-vpc-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/vpc.yaml'
-  
+
   # Internet Gateway Stack
   IGWStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: VPCStack
     Properties:
-      StackName: cicd-ecr-igw-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/igw.yaml'
       Parameters:
-        VpcStackName: cicd-ecr-vpc-stack
-  
+        VpcStackName: !GetAtt VPCStack.StackName
+
   # Subnets Stack
   SubnetsStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: VPCStack
     Properties:
-      StackName: cicd-ecr-subnets-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/subnets.yaml'
       Parameters:
-        VpcStackName: cicd-ecr-vpc-stack
-  
+        VpcStackName: !GetAtt VPCStack.StackName
+
   # Route Table Stack
   RouteTableStack:
     Type: AWS::CloudFormation::Stack
@@ -42,12 +41,11 @@ Resources:
       - VPCStack
       - SubnetsStack
     Properties:
-      StackName: cicd-ecr-routetable-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/route-table.yaml'
       Parameters:
-        VpcStackName: cicd-ecr-vpc-stack
-        SubnetsStackName: cicd-ecr-subnets-stack
-  
+        VpcStackName: !GetAtt VPCStack.StackName
+        SubnetsStackName: !GetAtt SubnetsStack.StackName
+
   # Route Stack
   RouteStack:
     Type: AWS::CloudFormation::Stack
@@ -55,22 +53,20 @@ Resources:
       - IGWStack
       - RouteTableStack
     Properties:
-      StackName: cicd-ecr-route-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/route.yaml'
       Parameters:
-        RouteTableStackName: cicd-ecr-routetable-stack
-        IGWStackName: cicd-ecr-igw-stack
-  
+        RouteTableStackName: !GetAtt RouteTableStack.StackName
+        IGWStackName: !GetAtt IGWStack.StackName
+
   # ALB Security Group Stack
   ALBSGStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: VPCStack
     Properties:
-      StackName: cicd-ecr-alb-sg-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/security/alb-sg.yaml'
       Parameters:
-        VpcStackName: cicd-ecr-vpc-stack
-  
+        VpcStackName: !GetAtt VPCStack.StackName
+
   # ECS Security Group Stack
   ECSSGStack:
     Type: AWS::CloudFormation::Stack
@@ -78,40 +74,35 @@ Resources:
       - VPCStack
       - ALBSGStack
     Properties:
-      StackName: cicd-ecr-ecs-sg-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/security/ecs-sg.yaml'
       Parameters:
-        VpcStackName: cicd-ecr-vpc-stack
-        ALBSGStackName: cicd-ecr-alb-sg-stack
-  
+        VpcStackName: !GetAtt VPCStack.StackName
+        ALBSGStackName: !GetAtt ALBSGStack.StackName
+
   # ECR Stack
   ECRStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      StackName: cicd-ecr-ecr-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/ecr.yaml'
-  
+
   # Logs Stack
   LogsStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      StackName: cicd-ecr-logs-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/logs.yaml'
-  
+
   # IAM Stack
   IAMStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      StackName: cicd-ecr-iam-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/iam.yaml'
-  
+
   # Cluster Stack
   ClusterStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      StackName: cicd-ecr-cluster-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/cluster.yaml'
-  
+
   # ALB Stack
   ALBStack:
     Type: AWS::CloudFormation::Stack
@@ -119,22 +110,20 @@ Resources:
       - SubnetsStack
       - ALBSGStack
     Properties:
-      StackName: cicd-ecr-alb-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/alb.yaml'
       Parameters:
-        SubnetsStackName: cicd-ecr-subnets-stack
-        ALBSGStackName: cicd-ecr-alb-sg-stack
-  
+        SubnetsStackName: !GetAtt SubnetsStack.StackName
+        ALBSGStackName: !GetAtt ALBSGStack.StackName
+
   # Target Group Stack
   TargetGroupStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: VPCStack
     Properties:
-      StackName: cicd-ecr-targetgroup-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/target-group.yaml'
       Parameters:
-        VpcStackName: cicd-ecr-vpc-stack
-  
+        VpcStackName: !GetAtt VPCStack.StackName
+
   # Task Definition Stack
   TaskDefStack:
     Type: AWS::CloudFormation::Stack
@@ -143,13 +132,12 @@ Resources:
       - LogsStack
       - IAMStack
     Properties:
-      StackName: cicd-ecr-taskdef-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/taskdef.yaml'
       Parameters:
         ECRRepoUri: !Ref ECRImageUri
-        LogGroupStackName: cicd-ecr-logs-stack
-        IAMStackName: cicd-ecr-iam-stack
-  
+        LogGroupStackName: !GetAtt LogsStack.StackName
+        IAMStackName: !GetAtt IAMStack.StackName
+
   # ECS Service Stack
   ServiceStack:
     Type: AWS::CloudFormation::Stack
@@ -160,14 +148,14 @@ Resources:
       - SubnetsStack
       - ECSSGStack
     Properties:
-      StackName: cicd-ecr-service-stack
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/service.yaml'
       Parameters:
-        ClusterStackName: cicd-ecr-cluster-stack
-        TaskDefStackName: cicd-ecr-taskdef-stack
-        TargetGroupStackName: cicd-ecr-targetgroup-stack
-        SubnetsStackName: cicd-ecr-subnets-stack
-        ECSSecurityGroupStackName: cicd-ecr-ecs-sg-stack
+        ClusterStackName: !GetAtt ClusterStack.StackName
+        TaskDefStackName: !GetAtt TaskDefStack.StackName
+        TargetGroupStackName: !GetAtt TargetGroupStack.StackName
+        SubnetsStackName: !GetAtt SubnetsStack.StackName
+        ECSSecurityGroupStackName: !GetAtt ECSSGStack.StackName
+
 Outputs:
   ALBDNSName:
     Description: ALB DNS Name
