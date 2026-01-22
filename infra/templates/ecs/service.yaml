@@ -16,6 +16,9 @@ Parameters:
   ECSSecurityGroupStackName:
     Type: String
     Description: CloudFormation stack name for ECS security group
+  ALBStackName:
+    Type: String
+    Description: CloudFormation stack name for ALB
 Resources:
   ECSService:
     Type: AWS::ECS::Service
@@ -58,7 +61,8 @@ Resources:
         - Field: path-pattern
           Values:
             - /*
-      ListenerArn: !Sub 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/cicd-ecr-alb/*'
+      ListenerArn: !ImportValue
+        Fn::Sub: '${ALBStackName}-ALBListenerArn'
       Priority: 1
 Outputs:
   ServiceName:
