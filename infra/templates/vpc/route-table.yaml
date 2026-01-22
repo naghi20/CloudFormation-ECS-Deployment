@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Route Table
+Parameters:
+  VpcStackName:
+    Type: String
+  SubnetsStackName:
+    Type: String
+Resources:
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue
+        Fn::Sub: '${VpcStackName}-VpcId'
+      Tags:
+        - Key: Name
+          Value: cicd-ecr-public-rt
+  SubnetAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !ImportValue
+        Fn::Sub: '${SubnetsStackName}-PublicSubnet1'
+      RouteTableId: !Ref PublicRouteTable
+  SubnetAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !ImportValue
+        Fn::Sub: '${SubnetsStackName}-PublicSubnet2'
+      RouteTableId: !Ref PublicRouteTable
+Outputs:
+  RouteTableId:
+    Value: !Ref PublicRouteTable
+    Export:
+      Name: !Sub '${AWS::StackName}-RouteTableId'
