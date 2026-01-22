@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Application Load Balancer
+Parameters:
+  SubnetsStackName:
+    Type: String
+  ALBSGStackName:
+    Type: String
+Resources:
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: cicd-ecr-alb
+      Subnets:
+        - !ImportValue
+          Fn::Sub: '${SubnetsStackName}-PublicSubnet1'
+        - !ImportValue
+          Fn::Sub: '${SubnetsStackName}-PublicSubnet2'
+      SecurityGroups:
+        - !ImportValue
+          Fn::Sub: '${ALBSGStackName}-ALBSGId'
+      Type: application
+      Tags:
+        - Key: Name
+          Value: cicd-ecr-alb
+Outputs:
+  ALBDNSName:
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: !Sub '${AWS::StackName}-ALBDNSName'
+  ALBArn:
+    Value: !GetAtt ApplicationLoadBalancer.LoadBalancerArn
+    Export:
+      Name: !Sub '${AWS::StackName}-ALBArn'
