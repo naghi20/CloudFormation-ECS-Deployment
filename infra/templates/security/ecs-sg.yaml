@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECS Security Group
+Parameters:
+  VpcStackName:
+    Type: String
+  ALBSGStackName:
+    Type: String
+Resources:
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS Security Group
+      VpcId: !ImportValue
+        Fn::Sub: '${VpcStackName}-VpcId'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !ImportValue
+            Fn::Sub: '${ALBSGStackName}-ALBSGId'
+      Tags:
+        - Key: Name
+          Value: cicd-ecr-ecs-sg
+Outputs:
+  ECSSecurityGroupId:
+    Value: !Ref ECSSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-ECSTaskSGId'
