@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Default Route to IGW
+Parameters:
+  RouteTableStackName:
+    Type: String
+  IGWStackName:
+    Type: String
+Resources:
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !ImportValue
+        Fn::Sub: '${RouteTableStackName}-RouteTableId'
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !ImportValue
+        Fn::Sub: '${IGWStackName}-IGWId'
