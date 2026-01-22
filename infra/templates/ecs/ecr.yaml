@@ -5,7 +5,8 @@ Resources:
     Type: AWS::ECR::Repository
     DeletionPolicy: Delete
     Properties:
-      RepositoryName: !Sub '${AWS::StackName}-repo'      ImageScanningConfiguration:
+      RepositoryName: !Sub '${AWS::StackName}-repo'
+            ImageScanningConfiguration:
         ScanOnPush: true
       Tags:
         - Key: Name
