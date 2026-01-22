@@ -23,7 +23,7 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/igw.yaml'
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
+        VpcStackName: !Ref VPCStack
 
   # Subnets Stack
   SubnetsStack:
@@ -32,7 +32,7 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/subnets.yaml'
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
+        VpcStackName: !Ref VPCStack
 
   # Route Table Stack
   RouteTableStack:
@@ -43,8 +43,8 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/route-table.yaml'
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
-        SubnetsStackName: !GetAtt SubnetsStack.StackName
+        VpcStackName: !Ref VPCStack
+        SubnetsStackName: !Ref SubnetsStack
 
   # Route Stack
   RouteStack:
@@ -55,8 +55,8 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/vpc/route.yaml'
       Parameters:
-        RouteTableStackName: !GetAtt RouteTableStack.StackName
-        IGWStackName: !GetAtt IGWStack.StackName
+        RouteTableStackName: !Ref RouteTableStack
+        IGWStackName: !Ref IGWStack
 
   # ALB Security Group Stack
   ALBSGStack:
@@ -65,7 +65,7 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/security/alb-sg.yaml'
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
+        VpcStackName: !Ref VPCStack
 
   # ECS Security Group Stack
   ECSSGStack:
@@ -76,8 +76,8 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/security/ecs-sg.yaml'
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
-        ALBSGStackName: !GetAtt ALBSGStack.StackName
+        VpcStackName: !Ref VPCStack
+        ALBSGStackName: !Ref ALBSGStack
 
   # ECR Stack
   ECRStack:
@@ -112,8 +112,8 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/alb.yaml'
       Parameters:
-        SubnetsStackName: !GetAtt SubnetsStack.StackName
-        ALBSGStackName: !GetAtt ALBSGStack.StackName
+        SubnetsStackName: !Ref SubnetsStack
+        ALBSGStackName: !Ref ALBSGStack
 
   # Target Group Stack
   TargetGroupStack:
@@ -122,7 +122,7 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/target-group.yaml'
       Parameters:
-        VpcStackName: !GetAtt VPCStack.StackName
+        VpcStackName: !Ref VPCStack
 
   # Task Definition Stack
   TaskDefStack:
@@ -135,8 +135,8 @@ Resources:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/taskdef.yaml'
       Parameters:
         ECRRepoUri: !Ref ECRImageUri
-        LogGroupStackName: !GetAtt LogsStack.StackName
-        IAMStackName: !GetAtt IAMStack.StackName
+        LogGroupStackName: !Ref LogsStack
+        IAMStackName: !Ref IAMStack
 
   # ECS Service Stack
   ServiceStack:
@@ -150,11 +150,11 @@ Resources:
     Properties:
       TemplateURL: !Sub 'https://s3.${AWS::Region}.amazonaws.com/${TemplatesBucket}/templates/ecs/service.yaml'
       Parameters:
-        ClusterStackName: !GetAtt ClusterStack.StackName
-        TaskDefStackName: !GetAtt TaskDefStack.StackName
-        TargetGroupStackName: !GetAtt TargetGroupStack.StackName
-        SubnetsStackName: !GetAtt SubnetsStack.StackName
-        ECSSecurityGroupStackName: !GetAtt ECSSGStack.StackName
+        ClusterStackName: !Ref ClusterStack
+        TaskDefStackName: !Ref TaskDefStack
+        TargetGroupStackName: !Ref TargetGroupStack
+        SubnetsStackName: !Ref SubnetsStack
+        ECSSecurityGroupStackName: !Ref ECSSGStack
 
 Outputs:
   ALBDNSName:
