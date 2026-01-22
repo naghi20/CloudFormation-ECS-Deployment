@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECS Cluster
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: cicd-ecr-cluster
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: Name
+          Value: cicd-ecr-cluster
+Outputs:
+  ClusterName:
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Sub '${AWS::StackName}-ClusterName'
+  ClusterArn:
+    Value: !GetAtt ECSCluster.ClusterArn
+    Export:
+      Name: !Sub '${AWS::StackName}-ClusterArn'
