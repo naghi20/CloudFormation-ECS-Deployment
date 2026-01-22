@@ -3,10 +3,9 @@ Description: ECR Repository
 Resources:
   ECRRepository:
     Type: AWS::ECR::Repository
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     Properties:
-      RepositoryName: cicd-ecr-app
-      ImageScanningConfiguration:
+      RepositoryName: !Sub '${AWS::StackName}-repo'      ImageScanningConfiguration:
         ScanOnPush: true
       Tags:
         - Key: Name
