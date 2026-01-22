@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ALB Listener
+Parameters:
+  ALBStackName:
+    Type: String
+  TargetGroupStackName:
+    Type: String
+Resources:
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !ImportValue
+        Fn::Sub: '${ALBStackName}-ALBArn'
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !ImportValue
+            
