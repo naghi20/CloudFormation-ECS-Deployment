@@ -5,7 +5,17 @@ Resources:
     Type: AWS::ECR::Repository
     DeletionPolicy: Delete
     Properties:
-      RepositoryName: !Sub '${AWS::StackName}-repo'
+      RepositoryName: !Sub "${AWS::StackName}-${AWS::Region}-repo"
+      Fn::Select:
+        - 0
+        Fn::Split:
+          - "-"
+          Fn::Select:
+            - 8
+            Fn::Split:
+              - "-"
+              - !Ref "AWS::StackId"
+
       ImageScanningConfiguration:
         ScanOnPush: true
       Tags:
