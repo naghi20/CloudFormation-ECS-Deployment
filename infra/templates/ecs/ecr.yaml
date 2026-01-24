@@ -1,26 +1,30 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: ECR Repository
+
 Resources:
   ECRRepository:
     Type: AWS::ECR::Repository
     DeletionPolicy: Delete
     Properties:
-      RepositoryName: !Sub "${AWS::StackName}-${AWS::Region}-repo"
-      Fn::Select:
-        - 0
-        Fn::Split:
-          - "-"
-          Fn::Select:
-            - 8
-            Fn::Split:
-              - "-"
-              - !Ref "AWS::StackId"
-
+      RepositoryName:
+        Fn::Join:
+          - ''
+          - - !Select
+              - 0
+              - !Split
+                - '-'
+                - !Select
+                  - 8
+                  - !Split
+                    - '/'
+                    - !Ref AWS::StackId
+            - !Sub '${AWS::Region}-repo'
       ImageScanningConfiguration:
         ScanOnPush: true
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-ecr-repo'
+
 Outputs:
   ECRRepositoryUri:
     Value: !GetAtt ECRRepository.RepositoryUri
