@@ -16,7 +16,7 @@ print_status() {
   echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1"
 }
 
-print_error() {
+print_error()   {
   echo -e "${RED}[ERROR]${NC} $1"
 }
 
