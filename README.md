@@ -6,4 +6,4 @@ CloudFormation-ECS-Deployment fargate &amp; cicd
 - AWS Account with admin access
 - AWS CLI installed and configured
 - Docker installed
-- Git installe
+- Git installed
